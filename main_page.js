@@ -3,25 +3,89 @@ var numS;
 var numP;
 var numR;
 var rslts = [];
+// let i = 0;
+// let p = i;
+// let k = p;
+
 
 class MainPage {
   constructor(achievedContainer, progressContainer, menuButton){
     this.achievedContainer = achievedContainer;
     this.progressContainer = progressContainer;
     this.menuButton = progressContainer;
-    this.fillPics(productivity);
-    this.fillPics(reading);
-    this.fillPics(social);
-    this.loadProgress(productivity);
-    this.loadProgress(reading);
-    this.loadProgress(social);
-    // this.loadBar();
     this.points().then((results) => {
       rslts = results;
     });
+
+    this.fillPics(productivity);
+    this.fillPics(reading);
+    this.fillPics(social);
+    this.fillAchievements;
+
+
   }
 
+  fillAchievements(num, category){
+    console.log("fillachieve");
+    let images = [];
+    //console.log(images.item(0));
+    for(const outerKey in category){
+      if(category === productivity){
+      images = document.querySelectorAll(".blacknwhitep");
+    }
+    else if(category === reading){
+    images = document.querySelectorAll(".blacknwhiter");
+    }
+    else images = document.querySelectorAll(".blacknwhites");
+      console.log(images.length);
+      if(num >= category[outerKey].time){
+        category[outerKey].achieved = "yes";
+        images.item(0).setAttribute("class", "");
+        console.log(images.item(0));
+      }
+    }
+  }
+
+  // fillAchievements(numR, numS, numP){
+  //   let images = [];
+  //   images = document.querySelectorAll("#blacknwhite");
+  //   for(const outerKey in productivity){
+  //     if(numP >= productivity[outerKey].time){ //achievement unlocked
+  //       productivity[outerKey].achieved = "yes";
+  //       console.log(outerKey + " achieved");
+  //       images.item(i).removeAttribute("id");
+  //       console.log(images.item(i));
+  //       i--;
+  //     }
+  //     i++;
+  //   }
+  //
+  //   for(const outerKey in reading){
+  //     if(numR >= reading[outerKey].time){ //achievement unlocked
+  //       reading[outerKey].achieved = "yes";
+  //       console.log(outerKey + " achieved");
+  //       images.item(p).removeAttribute("id");
+  //       console.log(images.item(p));
+  //       p--;
+  //     }
+  //     p++;
+  //   }
+  //
+  //       for(const outerKey in social){
+  //         if(numS >= social[outerKey].time){ //achievement unlocked
+  //           social[outerKey].achieved = "yes";
+  //           console.log(outerKey + " achieved");
+  //           images.item(k).removeAttribute("id");
+  //           console.log(images.item(k));
+  //           k--;
+  //         }
+  //         k++;
+  //       }
+  //
+  // }
+
   points() { //changes the productivity points
+    console.log("points");
     return new Promise((resolve, reject) => {
       let pointsContainer = this.achievedContainer.querySelector("#points");
 
@@ -37,15 +101,47 @@ class MainPage {
         numP = numP/60000.0; //minutes
         numR = numR/60000.0;
         numS = numS/60000.0;
-        console.log(numP);
-        console.log(numR);
-        console.log(numS);
+        console.log(numP); //productivity
+        console.log(numR);//reading
+        console.log(numS);//social
+        //this.fillAchievements(numR, numS, numP);
 
-        let total = Math.ceil((numR/1) + (numP/1) - (numS/1));//25 for R and P, 10 for S
+        let total = Math.ceil((numR) + (numP) - (numS));//25 for R and P, 10 for S
         if(total <= 0 || total === 'NaN'){
-          pointsContainer.innerHTML = 0;
+        pointsContainer.innerHTML = 0;
         }
-        else pointsContainer.innerHTML = total;
+       else  pointsContainer.innerHTML = total;
+
+        //Stats
+        let perS = Math.floor(100*numS/(numR + numP + numS));
+        let perR = Math.floor(100*numR/(numR + numP + numS));
+        let perP = Math.floor(100*numP/(numR + numP + numS));
+
+        let row1 = document.createElement("div");
+        let row2 = document.createElement("div");
+        let row3 = document.createElement("div");
+
+        row1.className = "row";
+        row2.className = "row";
+        row3.className = "row";
+
+        if(total === 0){
+          perS = 0;
+          perP = 0;
+          perR = 0;
+        }
+
+        row1.innerHTML = "Social Media: "+ perS +"%";
+        row2.innerHTML = "Productivity: "+ perP+"%";
+        row3.innerHTML = "Reading & Ref.: "+ perR+"%";
+
+        this.progressContainer.appendChild(row1);
+        this.progressContainer.appendChild(row2);
+        this.progressContainer.appendChild(row3);
+
+        this.fillAchievements(numP, productivity);
+        this.fillAchievements(numR, reading);
+        this.fillAchievements(numS, social);
 
         resolve([numP, numR, numS]);
       });
@@ -92,7 +188,13 @@ class MainPage {
           image.height = ""+30;
           //append image to td here
           if(category[outerKey].achieved === "no"){
-            image.id = "blacknwhite";
+            if(category === productivity){
+            image.className = "blacknwhitep";
+          }
+          else if(category === reading){
+          image.className = "blacknwhiter";
+        }
+        else image.className = "blacknwhites";
           }
           td.appendChild(image);
           //append td to tr here
@@ -120,7 +222,13 @@ class MainPage {
       //append image to td here
       td2.appendChild(image2);
       if(category[outerKey].achieved === "no"){
-        image2.id = "blacknwhite";
+        if(category === productivity){
+        image2.className = "blacknwhitep";
+      }
+      else if(category === reading){
+      image2.className = "blacknwhiter";
+    }
+    else image2.className = "blacknwhites";
       }
 
       //append td to tr here
@@ -132,21 +240,22 @@ class MainPage {
     //  console.log(tbody);
     table.appendChild(tbody);
     this.achievedContainer.appendChild(table);
+
   }
 
-  loadProgress(category){
-    let trophyContainer = this.progressContainer.querySelector("#emoji");
-    for(const outerKey in category){
-      let image = document.createElement("img");
-      image.id = "trophypic";
-          if(category[outerKey].inprogress === "yes"){ //if achievement in progress
-            image.src = ""+ category[outerKey].picUrl;
-            console.log(category[outerKey].picUrl);
-          }
-      trophyContainer.appendChild(image);
-    }
-    this.progressContainer.appendChild(trophyContainer);
-  }
+  // loadProgress(category){
+  //   let trophyContainer = this.progressContainer.querySelector("#emoji");
+  //   for(const outerKey in category){
+  //     let image = document.createElement("img");
+  //     image.id = "trophypic";
+  //         if(category[outerKey].inprogress === "yes"){ //if achievement in progress
+  //           image.src = ""+ category[outerKey].picUrl;
+  //           console.log(category[outerKey].picUrl);
+  //         }
+  //     trophyContainer.appendChild(image);
+  //   }
+  //   this.progressContainer.appendChild(trophyContainer);
+  // }
 
   // loadBar(category){
   //   let barContainer = this.progressContainer.querySelector("#bar");
