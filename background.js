@@ -7,22 +7,55 @@ var pageTitle = "test";
 var socialTime = 0;
 var productiveTime = 0;
 var readingTime = 0;
+var setSocial = 0;
 var pages = {
-	Social: ["Facebook", "Twitter", "Instagram", "YouTube", "reddit", "Messenger"],
-	Productivity: ["Gmail", "Outlook", "Google Docs"],
-	Reading:["ScienceDirect", "ResearchGate"]
-};
+	Social: ["Facebook", "Twitter", "Instagram", "YouTube", "reddit", "Messenger","Twitch","Snapchat", "Netflix", "imgur", "Vimeo", "VSCO", "Tumblr", "Crunchyroll", "Pinterest", "Flickr", "Vine"],
 
+		Productivity: ["Gmail", "Outlook", "Google Docs", "Wolfram Alpha","Chegg", "onQ", "Queen's University","Western University", "University of Waterloo", "Github", "Udemy", "Udacity", "Codecademy", "Coursera", "Lynda", "Education", "LinkedIn", "Slack", "Yahoo", "Hotmail", "Office365"],
+
+		Reading:["ScienceDirect", "ResearchGate", "Google Scholar", "Wikipedia", "Science","Microsoft Academic","WorldWideScience", "Google Books","Journal", "Research", "Audible", "Khan academy", "Encyclopedia", "edX"]
+};
+chrome.runtime.onInstalled.addListener(function(details){
+	console.log(details.reason);
+	if(details.reason == "install"){
+		chrome.storage.sync.set({Social: socialTime});
+		chrome.storage.sync.set({Productivity: productiveTime});
+		chrome.storage.sync.set({Reading: readingTime});
+	}
+});
+chrome.alarms.create('Update', {periodInMinutes: 1});
+chrome.alarms.create('screenAlarm', {periodInMinutes: 2});
 chrome.tabs.onUpdated.addListener(tabUpdated);
 chrome.tabs.onRemoved.addListener(tabClosed);
 chrome.tabs.onHighlighted.addListener(tabSwitch);
+chrome.alarms.onAlarm.addListener(function(alarm){
+	if(alarm.name == 'Update'){
+		chrome.tabs.query({'active':true, 'lastFocusedWindow': true}, function(tabs){
+			console.log("adsfasdf");
+			update();
+		});
+	}else if(alarm.name == 'socialAlarm'){
+		window.alert("You have been on Social Media for 10 minutes! You should probably take a break");
+		setSocial = 0;
+		setSocialAlarm();
+	}else if(alarm.name == 'screenAlarm'){
+		window.alert("You have been browsing for an hour. You should take a break to rest your eyes");
+	}
+});
 
+function update(){
+	data = { name: pageTitle };
+	saveTime(data);
+	startTime();
+}
 function tabUpdated(tab){
 	chrome.tabs.query({'active':true, 'lastFocusedWindow': true}, function(tabs){
 		dateObject = new Date();
 		if(dateObject.getTime() - lastUpdate > 10000){
 			prev = pageTitle
 			pageTitle = tabs[0].title;
+			console.log(tabs[0]);
+			setSocialAlarm();
 			if(pageTitle.localeCompare(prev) == 0 || start == 0){
 				startTime();
 			}else{
@@ -39,6 +72,8 @@ function tabSwitch(tab){
 	saveTime(data);
 	chrome.tabs.query({'active':true, 'lastFocusedWindow': true}, function(tabs){
 		pageTitle = tabs[0].title;
+		console.log(pageTitle);
+		setSocialAlarm();
 		startTime();
 	});
 }
@@ -55,7 +90,7 @@ function startTime(){
 }
 
 function saveTime(data){
-	dateObject = new Date();	
+	dateObject = new Date();
 	useTime = dateObject.valueOf() - timeStart;
 	start = 0;
 	tmp = data.name;
@@ -76,7 +111,7 @@ function saveTime(data){
 		}
 	}
 
-	
+
 	for(var i in pages.Productivity){
 		if(tmp.includes(pages.Productivity[i])){
 			chrome.storage.sync.get(['Productivity'], function(result){
@@ -109,5 +144,27 @@ function saveTime(data){
 				});
 			});
 		}
+	}
+}
+
+function setSocialAlarm(){
+	var set = 0;
+	console.log(setSocial);
+	for(var i in pages.Social){
+		if(pageTitle.toUpperCase().includes(pages.Social[i].toUpperCase())){
+			if(setSocial == 1){
+				set = 1;
+			}else{
+				chrome.alarms.create('socialAlarm', {delayInMinutes: 2});
+				console.log("social alarm set");
+				setSocial = 1;
+				set = 1;
+			}
+		}
+	}
+	if(!set){
+		setSocial = 0;
+		chrome.alarms.clear("socialAlarm");
+		console.log("alarm removed");
 	}
 }
