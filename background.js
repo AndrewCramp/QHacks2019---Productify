@@ -9,14 +9,13 @@ var productiveTime = 0;
 var readingTime = 0;
 var setSocial = 0;
 var pages = {
-	Social: ["Facebook", "Twitter", "Instagram", "YouTube", "reddit", "Messenger","Twitch","Snapchat", "Netflix", "imgur", "Vimeo", "VSCO", "Tumblr", "Crunchyroll", "Pinterest", "Flickr", "Vine"],
+	Social: [".tv", "facebook", "twitter", "instagram", "youtube", "reddit", "messenger","twitch","snapchat", "netflix", "imgur", "vimeo", "vsco", "tumblr", "crunchyroll", "pinterest", "flickr", "vine"],
 
-		Productivity: ["Gmail", "Outlook", "Google Docs", "Wolfram Alpha","Chegg", "onQ", "Queen's University","Western University", "University of Waterloo", "Github", "Udemy", "Udacity", "Codecademy", "Coursera", "Lynda", "Education", "LinkedIn", "Slack", "Yahoo", "Hotmail", "Office365"],
+		Productivity: [".edu","stackoverflow", "mail", "outlook", "docs", "wolframalpha","chegg", "onQ", "Queen's University","Western University", "University of Waterloo", "github", "udemy", "udacity", "codecademy", "coursera", "lynda", "Education", "linkedin", "slack", "yahoo", "hotmail", "office365"],
 
-		Reading:["ScienceDirect", "ResearchGate", "Google Scholar", "Wikipedia", "Science","Microsoft Academic","WorldWideScience", "Google Books","Journal", "Research", "Audible", "Khan academy", "Encyclopedia", "edX"]
+		Reading:["sciencedirect",".info", "researchgate", "scholar", "wikipedia", "science","academic","worldwidescience", "books","journal", "research", "audible", "khanacademy", "encyclopedia", "edX",".org",".gov",".gc"]
 };
 chrome.runtime.onInstalled.addListener(function(details){
-	console.log(details.reason);
 	if(details.reason == "install"){
 		chrome.storage.sync.set({Social: socialTime});
 		chrome.storage.sync.set({Productivity: productiveTime});
@@ -31,7 +30,6 @@ chrome.tabs.onHighlighted.addListener(tabSwitch);
 chrome.alarms.onAlarm.addListener(function(alarm){
 	if(alarm.name == 'Update'){
 		chrome.tabs.query({'active':true, 'lastFocusedWindow': true}, function(tabs){
-			console.log("adsfasdf");
 			update();
 		});
 	}else if(alarm.name == 'socialAlarm'){
@@ -53,8 +51,7 @@ function tabUpdated(tab){
 		dateObject = new Date();
 		if(dateObject.getTime() - lastUpdate > 10000){
 			prev = pageTitle
-			pageTitle = tabs[0].title;
-			console.log(tabs[0]);
+			pageTitle = tabs[0].url;
 			setSocialAlarm();
 			if(pageTitle.localeCompare(prev) == 0 || start == 0){
 				startTime();
@@ -71,8 +68,7 @@ function tabSwitch(tab){
 	data = { name: pageTitle };
 	saveTime(data);
 	chrome.tabs.query({'active':true, 'lastFocusedWindow': true}, function(tabs){
-		pageTitle = tabs[0].title;
-		console.log(pageTitle);
+		pageTitle = tabs[0].url;
 		setSocialAlarm();
 		startTime();
 	});
@@ -98,9 +94,6 @@ function saveTime(data){
 		if(tmp.includes(pages.Social[i])){
 			chrome.storage.sync.get(['Social'], function(result){
 				socialTime = result.Social;
-				console.log("loaded");
-				console.log(result);
-				console.log(useTime);
 				socialTime = socialTime + useTime;
 				chrome.storage.sync.set({Social: socialTime},function(){
 					console.log("Social");
