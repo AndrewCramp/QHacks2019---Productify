@@ -33,11 +33,11 @@ chrome.alarms.onAlarm.addListener(function(alarm){
 			update();
 		});
 	}else if(alarm.name == 'socialAlarm'){
-		window.alert("You have been on Social Media for 10 minutes! You should probably take a break");
+		window.alert("You have been on Social Media for quite a while! Time for a break?");
 		setSocial = 0;
 		setSocialAlarm();
 	}else if(alarm.name == 'screenAlarm'){
-		window.alert("You have been browsing for an hour. You should take a break to rest your eyes");
+		window.alert("You have been browsing for a while. Try going for a quick walk!");
 	}
 });
 
